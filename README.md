@@ -1,7 +1,220 @@
-# SnpEff_Galaxy_Tutorial
+---
+title: "Using SNPeff on Galaxy"
+author: "Kayla Barton, Lindsey Fenderson, and Ben King"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+---
 
-#Hello! 
-#Please feel free to follow along to this tutorial by downloading and opening the html file in your internet browser!
-#You can also download the rmd to make your own notes and edits
+## 1. Why we need good tools to visualize annotation 
 
-#Thanks for using this tutorial and good luck! 
+Using UCSC we can visualize the locations of our prospective sites, SnpEff vcf outputs, and bed files.
+
+![DAB2 Example](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/DAB2_p1.png) 
+![DAB2 Example](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/DAB2_p2.png)
+SNPeff allows us to see how our variants change a gene and where. Here is what a raw SnpEff file looks like. I've highlighted important parts in purple that I'll put into a spreadsheet. 
+
+![SnpEff Output](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/output_1.png)
+
+![SnpEff Output](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/output_2.png)
+
+
+![DAB2 Genotypes](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/DAB2_variant.png)
+
+
+![DAB2 Amino Acid Substitutions](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/DAB2_AA_sub.png)
+
+Note that just like in the picture of DAB2 on UCSC we found the same amino acid changes! 
+
+![DAB2 Allele read counts](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/DAB2_ARC.png)
+
+
+### a. Opening UCSC Genome Browser
+You can access the White-Throated sparrow genome on the UCSC Genome Browser by googling it or using this link: 
+https://genome.ucsc.edu/cgi-bin/hgTracks?db=hub_2172235_GCF_000385455.1&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=NW_005081537v1%3A11248104%2D11248175&hgsid=1271870139_caIUP1mE0oiZeK7TPV2S5EB8EPno
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/UCSC_home_2.png)
+
+### b. Loading Custom Tracks on UCSC
+Click the custom custom track button to add our files. 
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/custom_track_button.png)
+
+First lets try and load a bam file from http://katahdin.acg.maine.edu/~benking/GECO/
+On this page we have large bam files for each species. Bam files are tab-delimited text files that contain sequence alignment data. Because they are so large it's not easy to simply click download them and upload them to UCSC, instead you can right click the link and copy it into custom track data for faster upload. For this example we'll upload all of the nelson bam files. (You can either copy each link, or copy and paste this below)
+```{bash eval=FALSE}
+http://katahdin.acg.maine.edu/~benking/GECO/2391-71617_Anelsoni_BassHarborME_20100715_trimmed-bwamem-Zalbicollis-1.0.1.sorted_UCSC.bam
+
+http://katahdin.acg.maine.edu/~benking/GECO/2631-21304_Anelsoni_MaquoitBayME_20150812_trimmed-bwamem-Zalbicollis-1.0.1.sorted_UCSC.bam
+
+http://katahdin.acg.maine.edu/~benking/GECO/2781-84960_Anelsoni_PleasantRiverAddisonME_20190624_trimmed-bwamem-Zalbicollis-1.0.1.sorted_UCSC.bam
+```
+
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/bam_link_2.png)
+
+If the file was uploaded successfully, you should then see the manage custom tracks page, where you can continue to add files or delete unwanted tracks.
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/manage_custom_new.png)
+
+Next we'll add a bed file with gene regions. From http://katahdin.acg.maine.edu/~benking/GECO/
+copy the link for UCSC_WTSFoundGenesFull.bed and upload it to custom tracks. 
+```{bash eval=FALSE}
+http://katahdin.acg.maine.edu/~benking/GECO/UCSC_WTSFoundGenesFull.bed
+```
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/manage_custom_2.png)
+Sometimes bed files on UCSC can be finicky. Make sure your bed file follows this same format! Here are UCSC's basic guidelines for Bed files: https://genome.ucsc.edu/FAQ/FAQformat.html#format1
+
+Finally press go to see your custom tracks alongside the genome! (use the toolbar to toggle view.)
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/manage_custom_3_new.png)
+Now you can observe different regions of the genome, with our bed track we can see that this particular section is apart of GREM1. 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/UCSC_custom_new.png)
+Note if your screen doesn't match this change location by copying and pasting the text below:
+```{bash eval=FALSE}
+NW_005081537v1:11,248,139-11,248,210
+```
+
+By clicking the bars on the new bam tracks you can expand them to look at the reads and variants.
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/UCSC_custom_new_2.png)
+Notice anything interesting about these 3 different individuals? 
+
+Like with DAB2 using a SNPeff output we can find variants that have a different allele frequency 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/GREM1_snp_AF.png)
+
+Now that we understand why we need these visualization tools lets make our SnpEff file!
+
+## 2. Why use SNPeff and Galaxy?
+Galaxy creates a user friendly interface for running jobs without the use of your command line. SNPeff is a tool used for predicting the effects of genetic variants on genes and proteins.  In this tutorial we will be going through how to use SNPeff to help narrow down the list of genes that will be most impactful for the GTseq assay. 
+
+Note: all files used in this tutorial and more are available at http://katahdin.acg.maine.edu/~benking/GECO/
+
+### Workflow 
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/SnpEff_workflow.png) 
+
+
+## 3. Importing Histories in Galaxy
+
+### Logging in and importing shared histories
+First log in or create a Galaxy account. https://usegalaxy.org/login
+
+The basic galaxy layout consists of three major sections history, menu, and tools
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/galaxy_layout.png) 
+
+Use the following link to obtain the premade history 
+Galaxy Link: url: https://usegalaxy.org/u/suika_64/h/snpeffanalysisgtseq2 
+
+After clicking the link you'll be redirected to the history. In the upper right hand corner click the plus button to add the history to your galaxy account
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/import_history.png) 
+
+If done successfully, you should now have your galaxy homepage look like this:
+(If you have another history go to view all histories and switch to the imported one)
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/import_done.png) 
+
+## 4. Finding tools in Galaxy
+
+### Tool search and selection
+
+First search and select the tool you want to use, let's start off by searching "isec" and selecting "bcftools isec"
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/isec_search.png) 
+
+### Options and parameters
+
+When you select a tool, the middle menu section will change to the options of that tool, here you can select files to be used and parameters. 
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/isec_options.png) 
+After selecting options, just click execute! (you can also have Galaxy email you notifications for when the job is done)
+
+## 5.Running tools in Galaxy
+
+### a. bcftools isec 
+
+Bcftools isec allows you to create intersections, unions and complements of VCF files. Specifically we'll be using this for finding variants that are unique to a certain species when compared to another. 
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/isec_workflow_big.png)
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/isec_workflow_1.png)
+Recommended options: Slide the "Complement" option to yes. This will output positions that are unique to the first file when compared to others.  
+
+Select the two species you'd like to compare. (Helpful tip: isec will always makes your earliest file your first file, the way around this is to make a new history and copy over the species that you're interested in. For example NESP-BCF.bcf.gz is the 1st dataset in my history so no matter what combo I choose it will always output the unique Nelson variants when compared to different samples.)
+
+Example usage: Let's say I want to find all the variants that are unique to the Saltmarsh sparrow when compared to the Swamp sparrow. First I would create a new history and copy over the SALS-BCF.bcf.gz (drag from previous directory to current) then copy over SWSP-BCF.bcf.gz making them 1. and 2. respectively. Search for the isec tool, select it, and slide the Complement option to yes, select SALS-BCF.bcf.gz and SWSP-BCF.bcf.gz, and hit execute. 
+
+Note: You can also restrict this output by a certain region, just click "Restrict to" scroll down to "Regions" and select "Specify one or more Region(s) directly" in the drop down menu
+```{bash eval=FALSE}
+NW_005081537.1  
+
+11247728
+
+11248940
+```
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/isec_workflow_3.png)
+The isec output should look like this! 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/isec_output.png) 
+Another way to visualize bcftools isec is to see it almost a venn diagram 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/venny.png) 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/venny_result.png) 
+
+Note: that this list matches our isec results! 
+
+### b. bcftools stats
+
+This tool is pretty straightforward just select the file(s) you'd like to compare/get stats on and hit execute. (we can keep all the defaults for this tool)
+
+Note: we can also run this on our finished SNPeff file down the line
+
+### c. bcftools view
+
+Bcftools view is a tool that allows us to filter by region and allele frequency
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/view_workflow.png) 
+
+Recommended options: Set to desired region. Click Filter options, scroll down to Min Af and Max AF to set allelic frequency filters. As in bcftools isec we can also restrict by region if we're only interested in certain genes
+
+Example usage: 10-90 AF only want variants in GREM1 region 
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/view_options.png) 
+
+#### Bcftools view -Restrict by region
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/view_region_options_new.png) 
+
+
+#### Bcftools view -Restrict by allele frequency
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/view_allele_options_new.png) 
+
+
+### d. SNPeff eff
+SnpEff will allow us to identify the specific changes that are caused due to variants.
+
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/snpeff_search.png) 
+
+Select your filtered file, say yes to creating csv report, change genome source to "Custom snpEff database in your history" which should automatically select the "SnpEff4.3 database for Zonotrichia_albicollis" 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/snpeff_parameters.png)
+
+After the parameters are set hit the blue "Execute" button to run the job!
+The job may take a while so feel free to click away or do other work while the job is running. (it'll turn grey when submitted, yellow when running, and green once completed) You can even check the status on your phone or have galaxy email you once it's completed. 
+
+Once the job is finished you should now have a vcf/bed file!
+
+### e. Download files from Galaxy
+Once your new vcf or bed file is made you can download it by clicking the floppy disk. 
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/download_vcf.png)
+
+## Appendix
+SNPeff intro: http://pcingola.github.io/SnpEff/se_introduction/
+
+Galaxy tutorial: https://training.galaxyproject.org/training-material/topics/introduction/tutorials/galaxy-intro-101/tutorial.html?utm_source=redirect&utm_medium=learn&utm_campaign=galaxyhub
+
+Custom SnpEff database generation workflow: 
+
+#### Simple
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/simple_database.png)
+
+#### Detailed
+![](/Users/kaylabarton/Desktop/Galaxy_tutorial_pictures/detailed_database.png)
+
